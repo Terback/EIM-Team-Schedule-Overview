@@ -36,12 +36,20 @@ export function Sidebar({
   return (
     <aside className="w-64 border-r border-gray-200 bg-gray-50/50 h-full flex flex-col">
       <div className="p-6 border-b border-gray-200">
-        <div className="flex items-center gap-2 mb-1">
-          <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
-          <h1 className="text-lg font-semibold tracking-tight text-gray-900">Ghost Schedule</h1>
+        <div className="flex items-center gap-3 mb-3">
+          <img 
+            src="https://github.com/Terback/Images/blob/main/logo/logo%20color%20palette-website-01.png?raw=true" 
+            alt="Company Logo" 
+            className="h-8 w-auto object-contain"
+            referrerPolicy="no-referrer"
+          />
         </div>
-        <p className="text-sm text-gray-500 flex items-center gap-1">
-          <Users className="w-3 h-3" />
+        <p className="text-sm text-gray-500 flex items-center gap-1.5">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <Users className="w-3 h-3 ml-1" />
           {activeUsersCount} {activeUsersCount === 1 ? 'person' : 'people'} viewing
         </p>
       </div>
