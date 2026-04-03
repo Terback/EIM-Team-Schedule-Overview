@@ -1,20 +1,38 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# 🗓️ EIM-Team-Schedule
 
-# Run and deploy your AI Studio app
+**A minimalist, zero-login, real-time collaborative team scheduling dashboard.**
 
-This contains everything you need to run your app locally.
+Designed for small teams, workshops, and rapid project coordination. No accounts, no friction—just share the link and start planning.
 
-View your app in AI Studio: https://ai.studio/apps/03d04cde-617b-49e4-9dea-749c52ff6667
+---
 
-## Run Locally
+## ✨ Features
 
-**Prerequisites:**  Node.js
+- **🚀 Zero Login Required**: Anyone with the link can view and edit the schedule instantly.
+- **🎨 Highly Visual**: Color-coded events for "Classes", "Client Meetings", and "Deep Work".
+- **🔄 Real-Time Sync**: Changes reflect instantly across all connected clients (powered by Supabase/Firebase).
+- **🖱️ Intuitive UX**: Drag-and-drop to reschedule, click-to-edit, and hover for details.
+- **📱 Responsive Design**: Optimized for both desktop monitoring and mobile quick-checks.
+- **🔍 Team Filtering**: Quickly toggle visibility for specific team members via the sidebar.
 
+## 🛠️ Tech Stack
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+- **Frontend**: React.js, Tailwind CSS, Framer Motion (Animations)
+- **Icons**: Lucide-react
+- **Backend/Database**: [Your Choice: e.g., Supabase / Firebase / LocalStorage]
+- **Deployment**: Vercel
+- **DNS/Domain**: Cloudflare
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js (v18 or higher)
+- A Supabase/Firebase account (for real-time persistence)
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone [https://github.com/your-username/ghost-schedule.git](https://github.com/your-username/ghost-schedule.git)
+   cd ghost-schedule
