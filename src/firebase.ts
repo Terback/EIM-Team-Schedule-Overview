@@ -11,8 +11,13 @@ export const signInWithGoogle = async () => {
   const provider = new GoogleAuthProvider();
   try {
     await signInWithPopup(auth, provider);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error signing in with Google", error);
+    if (error.code === 'auth/unauthorized-domain') {
+      alert("登录失败：当前域名未授权。\n\n请前往 Firebase 控制台 -> Authentication -> Settings -> Authorized domains，将你的 Vercel 域名添加进去。");
+    } else {
+      alert("登录失败，请重试。错误信息: " + error.message);
+    }
   }
 };
 

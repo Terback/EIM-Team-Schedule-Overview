@@ -134,14 +134,20 @@ export function useSchedule() {
     try {
       const batch = writeBatch(db);
       
+      const [year, month, day] = event.date.split('-').map(Number);
+      
       for (let i = 0; i < weeks; i++) {
         const newId = crypto.randomUUID();
-        const eventDate = new Date(event.date);
+        
+        // Create date in local time to avoid UTC shift
+        const eventDate = new Date(year, month - 1, day);
         eventDate.setDate(eventDate.getDate() + (i * 7));
+        
+        const newDateStr = `${eventDate.getFullYear()}-${String(eventDate.getMonth() + 1).padStart(2, '0')}-${String(eventDate.getDate()).padStart(2, '0')}`;
         
         const eventCopy = {
           ...event,
-          date: eventDate.toISOString().split('T')[0]
+          date: newDateStr
         };
         
         const docRef = doc(db, 'events', newId);

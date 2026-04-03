@@ -44,9 +44,9 @@ service cloud.firestore {
       return data.keys().hasAll(['title', 'date', 'startTime', 'endTime', 'category', 'person']) &&
              data.keys().hasOnly(['title', 'date', 'startTime', 'endTime', 'category', 'person', 'description']) &&
              isValidString(data.title, 1, 100) &&
-             isValidString(data.date, 10, 10) &&
-             isValidString(data.startTime, 5, 5) &&
-             isValidString(data.endTime, 5, 5) &&
+             isValidString(data.date, 8, 10) &&
+             isValidString(data.startTime, 4, 5) &&
+             isValidString(data.endTime, 4, 5) &&
              isValidCategory(data.category) &&
              isValidString(data.person, 1, 50) &&
              (!('description' in data) || isValidOptionalString(data.description, 0, 500));
