@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'motion/react';
 interface EventModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (event: Omit<ScheduleEvent, 'id'>) => void;
+  onSave: (event: Omit<ScheduleEvent, 'id'>, recurringWeeks?: number) => void;
   onDelete?: (id: string) => void;
   initialData?: ScheduleEvent | null;
   selectedDate?: string;
@@ -25,6 +25,10 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, initialData, sel
   const [category, setCategory] = useState<Category>('Deep Work');
   const [person, setPerson] = useState('');
   const [description, setDescription] = useState('');
+  
+  // Recurring state
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurringWeeks, setRecurringWeeks] = useState(12); // Default 3 months (12 weeks)
 
   useEffect(() => {
     if (isOpen) {
@@ -36,6 +40,7 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, initialData, sel
         setCategory(initialData.category);
         setPerson(initialData.person);
         setDescription(initialData.description || '');
+        setIsRecurring(false); // Can't make an existing event recurring
       } else {
         setTitle('');
         setDate(selectedDate || new Date().toISOString().split('T')[0]);
@@ -53,6 +58,8 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, initialData, sel
         setCategory('Deep Work');
         setPerson(teamMembers.length > 0 ? teamMembers[0] : '');
         setDescription('');
+        setIsRecurring(false);
+        setRecurringWeeks(12);
       }
     }
   }, [isOpen, initialData, selectedDate, selectedTime, teamMembers]);
@@ -71,7 +78,7 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, initialData, sel
       category,
       person,
       description
-    });
+    }, isRecurring ? recurringWeeks : undefined);
     onClose();
   };
 
@@ -181,6 +188,40 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, initialData, sel
                 />
               </div>
             </div>
+
+            {!initialData && (
+              <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                <div className="flex items-center gap-2 mb-2">
+                  <input
+                    type="checkbox"
+                    id="isRecurring"
+                    checked={isRecurring}
+                    onChange={e => setIsRecurring(e.target.checked)}
+                    className="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900"
+                  />
+                  <label htmlFor="isRecurring" className="text-sm font-medium text-gray-700 cursor-pointer">
+                    Repeat weekly
+                  </label>
+                </div>
+                
+                {isRecurring && (
+                  <div className="pl-6 flex items-center gap-2">
+                    <span className="text-sm text-gray-500">For</span>
+                    <select
+                      value={recurringWeeks}
+                      onChange={e => setRecurringWeeks(Number(e.target.value))}
+                      className="px-2 py-1 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white"
+                    >
+                      <option value={4}>4 weeks (1 month)</option>
+                      <option value={8}>8 weeks (2 months)</option>
+                      <option value={12}>12 weeks (3 months)</option>
+                      <option value={24}>24 weeks (6 months)</option>
+                      <option value={52}>52 weeks (1 year)</option>
+                    </select>
+                  </div>
+                )}
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Description (Optional)</label>

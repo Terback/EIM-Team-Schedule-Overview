@@ -1,0 +1,42 @@
+{
+  "entities": {
+    "ScheduleEvent": {
+      "title": "ScheduleEvent",
+      "description": "An event on the schedule",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Event title" },
+        "date": { "type": "string", "description": "Date in YYYY-MM-DD" },
+        "startTime": { "type": "string", "description": "Start time in HH:mm" },
+        "endTime": { "type": "string", "description": "End time in HH:mm" },
+        "category": { "type": "string", "enum": ["Class", "Client Meeting", "Deep Work", "Other"] },
+        "person": { "type": "string", "description": "Person assigned to the event" },
+        "description": { "type": "string", "description": "Optional description" }
+      },
+      "required": ["title", "date", "startTime", "endTime", "category", "person"]
+    },
+    "TeamSettings": {
+      "title": "TeamSettings",
+      "description": "Settings for the team, including members",
+      "type": "object",
+      "properties": {
+        "members": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of team members"
+        }
+      },
+      "required": ["members"]
+    }
+  },
+  "firestore": {
+    "/events/{eventId}": {
+      "schema": { "$ref": "#/entities/ScheduleEvent" },
+      "description": "Collection of all schedule events"
+    },
+    "/settings/team": {
+      "schema": { "$ref": "#/entities/TeamSettings" },
+      "description": "Global team settings"
+    }
+  }
+}

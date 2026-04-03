@@ -1,0 +1,76 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: events
+    // Document ID: auto-generated
+    // Fields:
+    //   - title: string (required, max 100 chars)
+    //   - date: string (required, YYYY-MM-DD)
+    //   - startTime: string (required, HH:mm)
+    //   - endTime: string (required, HH:mm)
+    //   - category: string (required, enum)
+    //   - person: string (required, max 50 chars)
+    //   - description: string (optional, max 500 chars)
+    //
+    // Collection: settings
+    // Document ID: 'team'
+    // Fields:
+    //   - members: list of strings (required, max 50 items, max 50 chars each)
+    //
+    // ===============================================================
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isValidString(val, minLen, maxLen) {
+      return val is string && val.size() >= minLen && val.size() <= maxLen;
+    }
+
+    function isValidOptionalString(val, minLen, maxLen) {
+      return val == null || (val is string && val.size() >= minLen && val.size() <= maxLen);
+    }
+
+    function isValidCategory(val) {
+      return val in ['Class', 'Client Meeting', 'Deep Work', 'Other'];
+    }
+
+    function isValidEvent(data) {
+      return data.keys().hasAll(['title', 'date', 'startTime', 'endTime', 'category', 'person']) &&
+             data.keys().hasOnly(['title', 'date', 'startTime', 'endTime', 'category', 'person', 'description']) &&
+             isValidString(data.title, 1, 100) &&
+             isValidString(data.date, 10, 10) &&
+             isValidString(data.startTime, 5, 5) &&
+             isValidString(data.endTime, 5, 5) &&
+             isValidCategory(data.category) &&
+             isValidString(data.person, 1, 50) &&
+             (!('description' in data) || isValidOptionalString(data.description, 0, 500));
+    }
+
+    function isValidTeamSettings(data) {
+      return data.keys().hasAll(['members']) &&
+             data.keys().hasOnly(['members']) &&
+             data.members is list &&
+             data.members.size() <= 50;
+    }
+
+    match /events/{eventId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidEvent(request.resource.data);
+      allow update: if isAuthenticated() && isValidEvent(request.resource.data);
+      allow delete: if isAuthenticated();
+    }
+
+    match /settings/team {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidTeamSettings(request.resource.data);
+      allow update: if isAuthenticated() && isValidTeamSettings(request.resource.data);
+      allow delete: if false;
+    }
+  }
+}
