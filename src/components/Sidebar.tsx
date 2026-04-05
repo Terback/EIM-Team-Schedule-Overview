@@ -11,6 +11,7 @@ interface SidebarProps {
   onToggleAll: (selectAll: boolean) => void;
   isAllSelected: boolean;
   activeUsersCount?: number;
+  onClose?: () => void;
 }
 
 export function Sidebar({ 
@@ -21,7 +22,8 @@ export function Sidebar({
   onRemovePerson, 
   onToggleAll,
   isAllSelected,
-  activeUsersCount = 1 
+  activeUsersCount = 1,
+  onClose
 }: SidebarProps) {
   const [newPerson, setNewPerson] = useState('');
 
@@ -34,8 +36,14 @@ export function Sidebar({
   };
 
   return (
-    <aside className="w-64 border-r border-gray-200 bg-gray-50/50 h-full flex flex-col">
-      <div className="p-6 border-b border-gray-200">
+    <aside className="w-64 border-r border-gray-200 bg-gray-50/50 h-full flex flex-col shadow-xl lg:shadow-none">
+      <div className="p-6 border-b border-gray-200 relative">
+        <button 
+          onClick={onClose}
+          className="absolute right-4 top-6 p-1 text-gray-400 hover:text-gray-900 lg:hidden"
+        >
+          <X className="w-5 h-5" />
+        </button>
         <div className="flex items-center gap-3 mb-3">
           <img 
             src="https://github.com/Terback/Images/blob/main/logo/logo%20color%20palette-website-01.png?raw=true" 

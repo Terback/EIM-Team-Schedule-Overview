@@ -77,13 +77,13 @@ export function CalendarGrid({ events, onSlotClick, onEventClick, onEventDrop, s
         <div className="grid grid-cols-7 border-b border-gray-200 bg-white z-10 shrink-0">
           {weekDays.map(day => (
             <div key={day} className="py-2 text-center border-r border-gray-100 last:border-r-0">
-              <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <div className="text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {day}
               </div>
             </div>
           ))}
         </div>
-        <div className="flex-1 grid grid-cols-7 grid-rows-5 overflow-y-auto">
+        <div className="flex-1 grid grid-cols-7 grid-rows-5 overflow-y-auto overflow-x-hidden">
           {days.map((day, i) => {
             const dateStr = format(day, 'yyyy-MM-dd');
             const dayEvents = visibleEvents.filter(e => e.date === dateStr)
@@ -96,7 +96,7 @@ export function CalendarGrid({ events, onSlotClick, onEventClick, onEventDrop, s
               <div 
                 key={i}
                 className={cn(
-                  "border-r border-b border-gray-100 p-1 min-h-[100px] flex flex-col transition-colors",
+                  "border-r border-b border-gray-100 p-0.5 sm:p-1 min-h-[80px] sm:min-h-[100px] flex flex-col transition-colors",
                   !isCurrentMonth && "bg-gray-50/50",
                   "hover:bg-gray-50/80 cursor-pointer"
                 )}
@@ -105,37 +105,41 @@ export function CalendarGrid({ events, onSlotClick, onEventClick, onEventDrop, s
                 onDrop={(e) => handleDrop(e, dateStr)}
               >
                 <div className={cn(
-                  "text-xs font-medium p-1 text-right flex justify-end",
+                  "text-[10px] sm:text-xs font-medium p-0.5 sm:p-1 text-right flex justify-end",
                   isCurrentMonth ? "text-gray-700" : "text-gray-400"
                 )}>
                   <span className={cn(
-                    "w-6 h-6 flex items-center justify-center rounded-full",
+                    "w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-full",
                     isToday && "bg-emerald-500 text-white font-bold"
                   )}>
                     {format(day, 'd')}
                   </span>
                 </div>
-                <div className="flex-1 overflow-y-auto space-y-1 px-1 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto space-y-0.5 sm:space-y-1 px-0.5 sm:px-1 custom-scrollbar">
                   {dayEvents.map(event => {
                     const colorClass = CATEGORY_COLORS[event.category] || CATEGORY_COLORS['Other'];
                     return (
                       <motion.div
                         key={event.id}
                         layoutId={event.id}
-                        draggable
-                        onDragStart={(e: any) => handleDragStart(e, event.id)}
-                        onDragEnd={handleDragEnd}
                         onClick={(e: any) => {
                           e.stopPropagation();
                           onEventClick(event);
                         }}
                         className={cn(
-                          "text-[10px] p-1 rounded border truncate cursor-grab active:cursor-grabbing",
+                          "text-[8px] sm:text-[10px] p-0.5 sm:p-1 rounded border truncate cursor-grab active:cursor-grabbing",
                           colorClass
                         )}
                         title={`${event.startTime} - ${event.title} (${event.person})`}
                       >
-                        <span className="font-semibold">{event.startTime}</span> {event.title}
+                        <div
+                          draggable
+                          onDragStart={(e) => handleDragStart(e, event.id)}
+                          onDragEnd={handleDragEnd}
+                          className="w-full h-full"
+                        >
+                          <span className="hidden sm:inline font-semibold">{event.startTime}</span> {event.title}
+                        </div>
                       </motion.div>
                     );
                   })}
@@ -176,164 +180,173 @@ export function CalendarGrid({ events, onSlotClick, onEventClick, onEventDrop, s
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden bg-white">
-      {/* Header */}
-      <div className="flex border-b border-gray-200 bg-white z-10 shrink-0">
-        <div className="w-16 flex-shrink-0 border-r border-gray-200" />
-        {days.map((day, i) => {
-          const isToday = isSameDay(day, new Date());
-          return (
-            <div key={i} className="flex-1 py-3 text-center border-r border-gray-100 last:border-r-0">
-              <div className={cn(
-                "text-xs font-medium uppercase tracking-wider",
-                isToday ? "text-emerald-600 font-bold" : "text-gray-500"
-              )}>
-                {format(day, 'EEE')}
-              </div>
-              <div className={cn(
-                "text-lg mt-1 mx-auto w-8 h-8 flex items-center justify-center rounded-full",
-                isToday ? "bg-emerald-500 text-white font-bold" : "text-gray-700"
-              )}>
-                {format(day, 'd')}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Grid */}
-      <div className="flex-1 overflow-y-auto relative">
-        <div className="flex min-h-[800px]">
-          {/* Time labels */}
-          <div className="w-16 flex-shrink-0 border-r border-gray-200 bg-white relative z-10">
-            {HOURS.map(hour => (
-              <div 
-                key={hour} 
-                className="h-[60px] relative text-xs text-gray-400 text-right pr-2 -mt-2.5"
-              >
-                {hour === 12 ? '12 PM' : hour > 12 ? `${hour - 12} PM` : `${hour} AM`}
-              </div>
-            ))}
-          </div>
-
-          {/* Day columns */}
-          <div className="flex-1 flex relative">
-            {/* Horizontal grid lines */}
-            <div className="absolute inset-0 pointer-events-none">
-              {HOURS.map(hour => (
-                <div 
-                  key={hour} 
-                  className="h-[60px] border-t border-gray-100 w-full"
-                />
-              ))}
-            </div>
-
-            {/* Columns */}
-            {days.map((day, dayIdx) => {
-              const dateStr = format(day, 'yyyy-MM-dd');
-              const dayEvents = visibleEvents.filter(e => e.date === dateStr);
-              
-              // Calculate overlaps for side-by-side layout
-              const sortedEvents = [...dayEvents].sort((a, b) => a.startTime.localeCompare(b.startTime));
-              const clusters: ScheduleEvent[][] = [];
-              let currentCluster: ScheduleEvent[] = [];
-              let clusterEnd = 0;
-
-              sortedEvents.forEach(event => {
-                const start = getEventMinutes(event.startTime);
-                const end = getEventMinutes(event.endTime);
-                
-                if (currentCluster.length === 0) {
-                  currentCluster.push(event);
-                  clusterEnd = end;
-                } else if (start < clusterEnd) {
-                  currentCluster.push(event);
-                  clusterEnd = Math.max(clusterEnd, end);
-                } else {
-                  clusters.push(currentCluster);
-                  currentCluster = [event];
-                  clusterEnd = end;
-                }
-              });
-              if (currentCluster.length > 0) clusters.push(currentCluster);
-
-              const eventLayouts = new Map<string, { col: number, maxCols: number }>();
-              clusters.forEach(cluster => {
-                const columns: ScheduleEvent[][] = [];
-                cluster.forEach(event => {
-                  let placed = false;
-                  for (let i = 0; i < columns.length; i++) {
-                    const lastEvent = columns[i][columns[i].length - 1];
-                    if (!doesOverlap(lastEvent, event)) {
-                      columns[i].push(event);
-                      placed = true;
-                      break;
-                    }
-                  }
-                  if (!placed) {
-                    columns.push([event]);
-                  }
-                });
-                
-                const maxCols = columns.length;
-                columns.forEach((col, colIdx) => {
-                  col.forEach(event => {
-                    eventLayouts.set(event.id, { col: colIdx, maxCols });
-                  });
-                });
-              });
-
+      {/* Scrollable Container */}
+      <div className="flex-1 flex flex-col overflow-x-auto overflow-y-hidden custom-scrollbar">
+        <div className="min-w-[700px] flex-1 flex flex-col h-full">
+          {/* Header */}
+          <div className="flex border-b border-gray-200 bg-white z-20 shrink-0 sticky top-0">
+            <div className="w-12 sm:w-16 flex-shrink-0 border-r border-gray-200 bg-white" />
+            {days.map((day, i) => {
+              const isToday = isSameDay(day, new Date());
               return (
-                <div 
-                  key={dayIdx} 
-                  className="flex-1 relative border-r border-gray-100 last:border-r-0"
-                >
-                  {/* Drop zones for each hour */}
-                  {HOURS.map(hour => (
-                    <div
-                      key={hour}
-                      className="h-[60px] w-full cursor-pointer hover:bg-gray-50/50 transition-colors"
-                      onClick={() => onSlotClick(dateStr, `${hour.toString().padStart(2, '0')}:00`)}
-                      onDragOver={handleDragOver}
-                      onDrop={(e) => handleDrop(e, dateStr, hour)}
-                    />
-                  ))}
-
-                  {/* Events */}
-                  {dayEvents.map(event => {
-                    const layout = eventLayouts.get(event.id) || { col: 0, maxCols: 1 };
-                    const style = getEventStyles(event, layout);
-                    const colorClass = CATEGORY_COLORS[event.category] || CATEGORY_COLORS['Other'];
-                    
-                    return (
-                      <motion.div
-                        key={event.id}
-                        layoutId={event.id}
-                        draggable
-                        onDragStart={(e: any) => handleDragStart(e, event.id)}
-                        onDragEnd={handleDragEnd}
-                        onClick={(e: any) => {
-                          e.stopPropagation();
-                          onEventClick(event);
-                        }}
-                        className={cn(
-                          "absolute rounded-md border p-1.5 overflow-hidden cursor-grab active:cursor-grabbing shadow-sm transition-shadow hover:shadow-md",
-                          colorClass
-                        )}
-                        style={style}
-                      >
-                        <div className="text-xs font-semibold truncate">{event.title}</div>
-                        <div className="text-[10px] opacity-80 truncate mt-0.5">
-                          {event.startTime} - {event.endTime}
-                        </div>
-                        <div className="text-[10px] font-medium mt-1 truncate">
-                          {event.person}
-                        </div>
-                      </motion.div>
-                    );
-                  })}
+                <div key={i} className="flex-1 py-2 sm:py-3 text-center border-r border-gray-100 last:border-r-0">
+                  <div className={cn(
+                    "text-[10px] sm:text-xs font-medium uppercase tracking-wider",
+                    isToday ? "text-emerald-600 font-bold" : "text-gray-500"
+                  )}>
+                    {format(day, 'EEE')}
+                  </div>
+                  <div className={cn(
+                    "text-sm sm:text-lg mt-0.5 sm:mt-1 mx-auto w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-full",
+                    isToday ? "bg-emerald-500 text-white font-bold" : "text-gray-700"
+                  )}>
+                    {format(day, 'd')}
+                  </div>
                 </div>
               );
             })}
+          </div>
+
+          {/* Grid */}
+          <div className="flex-1 overflow-y-auto relative custom-scrollbar">
+            <div className="flex min-h-[800px]">
+              {/* Time labels */}
+              <div className="w-12 sm:w-16 flex-shrink-0 border-r border-gray-200 bg-white sticky left-0 z-10">
+                {HOURS.map(hour => (
+                  <div 
+                    key={hour} 
+                    className="h-[60px] relative text-[10px] sm:text-xs text-gray-400 text-right pr-1 sm:pr-2 -mt-2.5 bg-white"
+                  >
+                    {hour === 12 ? '12 PM' : hour > 12 ? `${hour - 12} PM` : `${hour} AM`}
+                  </div>
+                ))}
+              </div>
+
+              {/* Day columns */}
+              <div className="flex-1 flex relative">
+                {/* Horizontal grid lines */}
+                <div className="absolute inset-0 pointer-events-none">
+                  {HOURS.map(hour => (
+                    <div 
+                      key={hour} 
+                      className="h-[60px] border-t border-gray-100 w-full"
+                    />
+                  ))}
+                </div>
+
+                {/* Columns */}
+                {days.map((day, dayIdx) => {
+                  const dateStr = format(day, 'yyyy-MM-dd');
+                  const dayEvents = visibleEvents.filter(e => e.date === dateStr);
+                  
+                  // Calculate overlaps for side-by-side layout
+                  const sortedEvents = [...dayEvents].sort((a, b) => a.startTime.localeCompare(b.startTime));
+                  const clusters: ScheduleEvent[][] = [];
+                  let currentCluster: ScheduleEvent[] = [];
+                  let clusterEnd = 0;
+
+                  sortedEvents.forEach(event => {
+                    const start = getEventMinutes(event.startTime);
+                    const end = getEventMinutes(event.endTime);
+                    
+                    if (currentCluster.length === 0) {
+                      currentCluster.push(event);
+                      clusterEnd = end;
+                    } else if (start < clusterEnd) {
+                      currentCluster.push(event);
+                      clusterEnd = Math.max(clusterEnd, end);
+                    } else {
+                      clusters.push(currentCluster);
+                      currentCluster = [event];
+                      clusterEnd = end;
+                    }
+                  });
+                  if (currentCluster.length > 0) clusters.push(currentCluster);
+
+                  const eventLayouts = new Map<string, { col: number, maxCols: number }>();
+                  clusters.forEach(cluster => {
+                    const columns: ScheduleEvent[][] = [];
+                    cluster.forEach(event => {
+                      let placed = false;
+                      for (let i = 0; i < columns.length; i++) {
+                        const lastEvent = columns[i][columns[i].length - 1];
+                        if (!doesOverlap(lastEvent, event)) {
+                          columns[i].push(event);
+                          placed = true;
+                          break;
+                        }
+                      }
+                      if (!placed) {
+                        columns.push([event]);
+                      }
+                    });
+                    
+                    const maxCols = columns.length;
+                    columns.forEach((col, colIdx) => {
+                      col.forEach(event => {
+                        eventLayouts.set(event.id, { col: colIdx, maxCols });
+                      });
+                    });
+                  });
+
+                  return (
+                    <div 
+                      key={dayIdx} 
+                      className="flex-1 relative border-r border-gray-100 last:border-r-0"
+                    >
+                      {/* Drop zones for each hour */}
+                      {HOURS.map(hour => (
+                        <div
+                          key={hour}
+                          className="h-[60px] w-full cursor-pointer hover:bg-gray-50/50 transition-colors"
+                          onClick={() => onSlotClick(dateStr, `${hour.toString().padStart(2, '0')}:00`)}
+                          onDragOver={handleDragOver}
+                          onDrop={(e) => handleDrop(e, dateStr, hour)}
+                        />
+                      ))}
+
+                      {/* Events */}
+                      {dayEvents.map(event => {
+                        const layout = eventLayouts.get(event.id) || { col: 0, maxCols: 1 };
+                        const style = getEventStyles(event, layout);
+                        const colorClass = CATEGORY_COLORS[event.category] || CATEGORY_COLORS['Other'];
+                        
+                        return (
+                          <motion.div
+                            key={event.id}
+                            layoutId={event.id}
+                            onClick={(e: any) => {
+                              e.stopPropagation();
+                              onEventClick(event);
+                            }}
+                            className={cn(
+                              "absolute rounded-md border p-1 sm:p-1.5 overflow-hidden cursor-grab active:cursor-grabbing shadow-sm transition-shadow hover:shadow-md",
+                              colorClass
+                            )}
+                            style={style}
+                          >
+                            <div
+                              draggable
+                              onDragStart={(e) => handleDragStart(e, event.id)}
+                              onDragEnd={handleDragEnd}
+                              className="w-full h-full"
+                            >
+                              <div className="text-[10px] sm:text-xs font-semibold truncate leading-tight">{event.title}</div>
+                              <div className="text-[8px] sm:text-[10px] opacity-80 truncate mt-0.5">
+                                {event.startTime} - {event.endTime}
+                              </div>
+                              <div className="text-[8px] sm:text-[10px] font-medium mt-0.5 sm:mt-1 truncate">
+                                {event.person}
+                              </div>
+                            </div>
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -11,7 +11,7 @@ import { useSchedule } from './hooks/useSchedule';
 import { ScheduleEvent } from './types';
 import { cn } from './lib/utils';
 import { format, addWeeks, subWeeks, addMonths, subMonths } from 'date-fns';
-import { ChevronLeft, ChevronRight, LogOut } from 'lucide-react';
+import { ChevronLeft, ChevronRight, LogOut, Menu } from 'lucide-react';
 import { signInWithGoogle, logOut } from './firebase';
 
 export default function App() {
@@ -19,6 +19,7 @@ export default function App() {
   
   const [selectedPeople, setSelectedPeople] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<ScheduleEvent | null>(null);
   const [viewMode, setViewMode] = useState<'weekly' | 'monthly'>('weekly');
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -160,24 +161,45 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-screen w-full bg-white overflow-hidden font-sans">
-      <Sidebar 
-        people={teamMembers}
-        selectedPeople={selectedPeople}
-        togglePerson={handleTogglePerson}
-        onAddPerson={addTeamMember}
-        onRemovePerson={removeTeamMember}
-        onToggleAll={handleToggleAll}
-        isAllSelected={isAllSelected}
-        activeUsersCount={Math.floor(Math.random() * 3) + 1} // Mock active users
-      />
+    <div className="flex h-screen w-full bg-white overflow-hidden font-sans relative">
+      {/* Mobile Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-gray-900/20 backdrop-blur-sm z-40 lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      <div className={cn(
+        "fixed inset-y-0 left-0 z-50 lg:relative lg:z-0 transform transition-transform duration-300 ease-in-out lg:translate-x-0",
+        isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+      )}>
+        <Sidebar 
+          people={teamMembers}
+          selectedPeople={selectedPeople}
+          togglePerson={handleTogglePerson}
+          onAddPerson={addTeamMember}
+          onRemovePerson={removeTeamMember}
+          onToggleAll={handleToggleAll}
+          isAllSelected={isAllSelected}
+          activeUsersCount={Math.floor(Math.random() * 3) + 1} // Mock active users
+          onClose={() => setIsSidebarOpen(false)}
+        />
+      </div>
       
       <main className="flex-1 flex flex-col h-full overflow-hidden">
-        <header className="h-16 border-b border-gray-200 flex items-center justify-between px-6 bg-white shrink-0">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-4">
-              <h2 className="text-lg font-medium text-gray-900 w-40">
-                {format(currentDate, 'MMMM yyyy')}
+        <header className="h-auto min-h-[4rem] border-b border-gray-200 flex flex-col sm:flex-row items-center justify-between px-4 py-3 sm:py-0 sm:px-6 bg-white shrink-0 gap-4">
+          <div className="flex items-center justify-between w-full sm:w-auto gap-4">
+            <button 
+              onClick={() => setIsSidebarOpen(true)}
+              className="p-2 -ml-2 text-gray-500 hover:text-gray-900 lg:hidden"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+
+            <div className="flex items-center gap-2 sm:gap-4">
+              <h2 className="text-base sm:text-lg font-medium text-gray-900 min-w-[100px] sm:w-40 truncate">
+                {format(currentDate, 'MMM yyyy')}
               </h2>
               <div className="flex items-center gap-1 bg-gray-50 rounded-lg p-1 border border-gray-200">
                 <button 
@@ -188,7 +210,7 @@ export default function App() {
                 </button>
                 <button 
                   onClick={handleToday}
-                  className="px-2 py-1 text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-white rounded transition-colors"
+                  className="px-2 py-1 text-[10px] sm:text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-white rounded transition-colors"
                 >
                   Today
                 </button>
@@ -200,12 +222,14 @@ export default function App() {
                 </button>
               </div>
             </div>
-            
+          </div>
+          
+          <div className="flex items-center justify-between w-full sm:w-auto gap-3">
             <div className="flex bg-gray-100 p-1 rounded-lg">
               <button
                 onClick={() => setViewMode('weekly')}
                 className={cn(
-                  "px-3 py-1.5 text-sm font-medium rounded-md transition-colors",
+                  "px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-md transition-colors",
                   viewMode === 'weekly' ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
                 )}
               >
@@ -214,34 +238,34 @@ export default function App() {
               <button
                 onClick={() => setViewMode('monthly')}
                 className={cn(
-                  "px-3 py-1.5 text-sm font-medium rounded-md transition-colors",
+                  "px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-md transition-colors",
                   viewMode === 'monthly' ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
                 )}
               >
                 Monthly
               </button>
             </div>
-          </div>
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => {
-                setEditingEvent(null);
-                setSelectedDate('');
-                setSelectedTime('');
-                setIsModalOpen(true);
-              }}
-              className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors shadow-sm"
-            >
-              Add Event
-            </button>
-            <button
-              onClick={logOut}
-              className="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-              title="Sign Out"
-            >
-              <LogOut className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  setEditingEvent(null);
+                  setSelectedDate('');
+                  setSelectedTime('');
+                  setIsModalOpen(true);
+                }}
+                className="px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-900 text-white text-xs sm:text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors shadow-sm whitespace-nowrap"
+              >
+                Add Event
+              </button>
+              <button
+                onClick={logOut}
+                className="p-1.5 sm:p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                title="Sign Out"
+              >
+                <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
+              </button>
+            </div>
           </div>
         </header>
         
