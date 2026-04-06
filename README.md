@@ -28,6 +28,7 @@ This is a centralized internal coordination tool for **EIM Technology**. It prov
 
 When migrating or updating the subdomain, ensure the following settings are applied in your Cloudflare dashboard:
 
+
 ### DNS Record
 - **Type**: `CNAME`
 - **Name**: `teamschedule`
