@@ -35,6 +35,7 @@ When migrating or updating the subdomain, ensure the following settings are appl
 - **Proxy Status**: 💡 **DNS Only (Gray Cloud)**
   > *Note: Keep Proxy "Off" during initial SSL handshake on Vercel. You can enable the Orange Cloud once the domain is verified.*
 
+
 ### SSL/TLS Encryption
 - **Mode**: **Full** or **Full (Strict)**
   > *Warning: Setting this to "Flexible" will cause a "Too many redirects" error because Vercel enforces HTTPS.*
