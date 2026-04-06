@@ -22,6 +22,7 @@ This is a centralized internal coordination tool for **EIM Technology**. It prov
 
 ---
 
+
 ## 🌐 Domain & DNS Configuration (Cloudflare)
 
 When migrating or updating the subdomain, ensure the following settings are applied in your Cloudflare dashboard:
