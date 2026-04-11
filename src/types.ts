@@ -8,6 +8,7 @@ export interface ScheduleEvent {
   endTime: string; // HH:mm (24h)
   category: Category;
   person: string;
+  student?: string;
   description?: string;
 }
 

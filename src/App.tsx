@@ -15,7 +15,21 @@ import { ChevronLeft, ChevronRight, LogOut, Menu } from 'lucide-react';
 import { signInWithGoogle, logOut } from './firebase';
 
 export default function App() {
-  const { events, teamMembers, addEvent, addRecurringEvents, updateEvent, deleteEvent, addTeamMember, removeTeamMember, isLoaded, userId } = useSchedule();
+  const { 
+    events, 
+    teamMembers, 
+    students,
+    addEvent, 
+    addRecurringEvents, 
+    updateEvent, 
+    deleteEvent, 
+    addTeamMember, 
+    removeTeamMember, 
+    addStudent,
+    removeStudent,
+    isLoaded, 
+    userId 
+  } = useSchedule();
   
   const [selectedPeople, setSelectedPeople] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -184,6 +198,10 @@ export default function App() {
           isAllSelected={isAllSelected}
           activeUsersCount={Math.floor(Math.random() * 3) + 1} // Mock active users
           onClose={() => setIsSidebarOpen(false)}
+          students={students}
+          onAddStudent={addStudent}
+          onRemoveStudent={removeStudent}
+          events={events}
         />
       </div>
       
@@ -289,6 +307,7 @@ export default function App() {
         selectedDate={selectedDate}
         selectedTime={selectedTime}
         teamMembers={teamMembers}
+        students={students}
       />
     </div>
   );

@@ -42,14 +42,15 @@ service cloud.firestore {
 
     function isValidEvent(data) {
       return data.keys().hasAll(['title', 'date', 'startTime', 'endTime', 'category', 'person']) &&
-             data.keys().hasOnly(['title', 'date', 'startTime', 'endTime', 'category', 'person', 'description']) &&
+             data.keys().hasOnly(['title', 'date', 'startTime', 'endTime', 'category', 'person', 'description', 'student']) &&
              isValidString(data.title, 1, 100) &&
              isValidString(data.date, 8, 10) &&
              isValidString(data.startTime, 4, 5) &&
              isValidString(data.endTime, 4, 5) &&
              isValidCategory(data.category) &&
              isValidString(data.person, 1, 50) &&
-             (!('description' in data) || isValidOptionalString(data.description, 0, 500));
+             (!('description' in data) || isValidOptionalString(data.description, 0, 500)) &&
+             (!('student' in data) || isValidOptionalString(data.student, 0, 50));
     }
 
     function isValidTeamSettings(data) {
@@ -57,6 +58,13 @@ service cloud.firestore {
              data.keys().hasOnly(['members']) &&
              data.members is list &&
              data.members.size() <= 50;
+    }
+
+    function isValidStudentSettings(data) {
+      return data.keys().hasAll(['students']) &&
+             data.keys().hasOnly(['students']) &&
+             data.students is list &&
+             data.students.size() <= 100;
     }
 
     match /events/{eventId} {
@@ -70,6 +78,13 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && isValidTeamSettings(request.resource.data);
       allow update: if isAuthenticated() && isValidTeamSettings(request.resource.data);
+      allow delete: if false;
+    }
+
+    match /settings/students {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidStudentSettings(request.resource.data);
+      allow update: if isAuthenticated() && isValidStudentSettings(request.resource.data);
       allow delete: if false;
     }
   }

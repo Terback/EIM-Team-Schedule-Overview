@@ -13,17 +13,19 @@ interface EventModalProps {
   selectedDate?: string;
   selectedTime?: string;
   teamMembers: string[];
+  students: string[];
 }
 
 const CATEGORIES: Category[] = ['Class', 'Client Meeting', 'Deep Work', 'Other'];
 
-export function EventModal({ isOpen, onClose, onSave, onDelete, initialData, selectedDate, selectedTime, teamMembers }: EventModalProps) {
+export function EventModal({ isOpen, onClose, onSave, onDelete, initialData, selectedDate, selectedTime, teamMembers, students }: EventModalProps) {
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
   const [category, setCategory] = useState<Category>('Deep Work');
   const [person, setPerson] = useState('');
+  const [student, setStudent] = useState('');
   const [description, setDescription] = useState('');
   
   // Recurring state
@@ -39,6 +41,7 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, initialData, sel
         setEndTime(initialData.endTime);
         setCategory(initialData.category);
         setPerson(initialData.person);
+        setStudent(initialData.student || '');
         setDescription(initialData.description || '');
         setIsRecurring(false); // Can't make an existing event recurring
       } else {
@@ -57,6 +60,7 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, initialData, sel
         
         setCategory('Deep Work');
         setPerson(teamMembers.length > 0 ? teamMembers[0] : '');
+        setStudent('');
         setDescription('');
         setIsRecurring(false);
         setRecurringWeeks(12);
@@ -77,6 +81,7 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, initialData, sel
       endTime,
       category,
       person,
+      student: category === 'Class' ? student : undefined,
       description
     }, isRecurring ? recurringWeeks : undefined);
     onClose();
@@ -111,7 +116,7 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, initialData, sel
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto custom-scrollbar">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Event Title</label>
               <input
@@ -133,6 +138,7 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, initialData, sel
                   onChange={e => setPerson(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-shadow bg-white"
                 >
+                  <option value="" disabled>Select person</option>
                   {teamMembers.map(p => (
                     <option key={p} value={p}>{p}</option>
                   ))}
@@ -154,6 +160,27 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, initialData, sel
                 </select>
               </div>
             </div>
+
+            {category === 'Class' && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+              >
+                <label className="block text-sm font-medium text-gray-700 mb-1">Student</label>
+                <select
+                  value={student}
+                  onChange={e => setStudent(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-shadow bg-white"
+                >
+                  <option value="">Select student</option>
+                  {students.map(s => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+                <p className="text-[10px] text-gray-400 mt-1">Add students in the sidebar if not listed.</p>
+              </motion.div>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>

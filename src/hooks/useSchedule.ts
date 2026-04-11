@@ -55,6 +55,7 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
 export function useSchedule() {
   const [events, setEvents] = useState<ScheduleEvent[]>([]);
   const [teamMembers, setTeamMembers] = useState<string[]>([]);
+  const [students, setStudents] = useState<string[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
 
@@ -108,14 +109,31 @@ export function useSchedule() {
             .catch(error => handleFirestoreError(error, OperationType.WRITE, 'settings/team'));
           setTeamMembers(INITIAL_TEAM);
         }
-        setIsLoaded(true);
       },
       (error) => handleFirestoreError(error, OperationType.GET, 'settings/team')
+    );
+
+    // Listen to student settings
+    const unsubscribeStudents = onSnapshot(
+      doc(db, 'settings', 'students'),
+      (docSnap) => {
+        if (docSnap.exists()) {
+          setStudents(docSnap.data().students || []);
+        } else {
+          // Initialize students if it doesn't exist
+          setDoc(doc(db, 'settings', 'students'), { students: [] })
+            .catch(error => handleFirestoreError(error, OperationType.WRITE, 'settings/students'));
+          setStudents([]);
+        }
+        setIsLoaded(true);
+      },
+      (error) => handleFirestoreError(error, OperationType.GET, 'settings/students')
     );
 
     return () => {
       unsubscribeEvents();
       unsubscribeTeam();
+      unsubscribeStudents();
     };
   }, [userId]);
 
@@ -201,15 +219,41 @@ export function useSchedule() {
     }
   }, [teamMembers, userId]);
 
+  const addStudent = useCallback(async (name: string) => {
+    if (!userId) return;
+    const trimmed = name.trim();
+    if (trimmed && !students.includes(trimmed)) {
+      const newStudents = [...students, trimmed];
+      try {
+        await setDoc(doc(db, 'settings', 'students'), { students: newStudents });
+      } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, 'settings/students');
+      }
+    }
+  }, [students, userId]);
+
+  const removeStudent = useCallback(async (name: string) => {
+    if (!userId) return;
+    const newStudents = students.filter(student => student !== name);
+    try {
+      await setDoc(doc(db, 'settings', 'students'), { students: newStudents });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, 'settings/students');
+    }
+  }, [students, userId]);
+
   return {
     events,
     teamMembers,
+    students,
     addEvent,
     addRecurringEvents,
     updateEvent,
     deleteEvent,
     addTeamMember,
     removeTeamMember,
+    addStudent,
+    removeStudent,
     isLoaded,
     userId
   };

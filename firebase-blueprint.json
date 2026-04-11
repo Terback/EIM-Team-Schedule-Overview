@@ -11,6 +11,7 @@
         "endTime": { "type": "string", "description": "End time in HH:mm" },
         "category": { "type": "string", "enum": ["Class", "Client Meeting", "Deep Work", "Other"] },
         "person": { "type": "string", "description": "Person assigned to the event" },
+        "student": { "type": "string", "description": "Student attending the class (if category is Class)" },
         "description": { "type": "string", "description": "Optional description" }
       },
       "required": ["title", "date", "startTime", "endTime", "category", "person"]
@@ -27,6 +28,19 @@
         }
       },
       "required": ["members"]
+    },
+    "StudentSettings": {
+      "title": "StudentSettings",
+      "description": "Settings for students",
+      "type": "object",
+      "properties": {
+        "students": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of students"
+        }
+      },
+      "required": ["students"]
     }
   },
   "firestore": {
@@ -37,6 +51,10 @@
     "/settings/team": {
       "schema": { "$ref": "#/entities/TeamSettings" },
       "description": "Global team settings"
+    },
+    "/settings/students": {
+      "schema": { "$ref": "#/entities/StudentSettings" },
+      "description": "Global student settings"
     }
   }
 }
