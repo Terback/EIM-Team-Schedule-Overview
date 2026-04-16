@@ -74,16 +74,21 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, initialData, sel
     e.preventDefault();
     if (!title || !date || !startTime || !endTime || !person) return;
     
-    onSave({
+    const eventData: Omit<ScheduleEvent, 'id'> = {
       title,
       date,
       startTime,
       endTime,
       category,
       person,
-      student: category === 'Class' ? student : undefined,
       description
-    }, isRecurring ? recurringWeeks : undefined);
+    };
+    
+    if (category === 'Class' && student) {
+      eventData.student = student;
+    }
+    
+    onSave(eventData, isRecurring ? recurringWeeks : undefined);
     onClose();
   };
 
